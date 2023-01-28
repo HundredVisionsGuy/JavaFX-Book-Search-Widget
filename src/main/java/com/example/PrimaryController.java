@@ -1,5 +1,11 @@
 package com.example;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -40,9 +46,12 @@ public class PrimaryController {
             https://www.codeproject.com/Tips/1159537/Simple-JSON-REST-Consumption-with-GSON-API
         */
         
-        // Test searchText and 
+        // Display the search text
         searchResults.setText(searchText);
+
+        // Make API Call
         String apiResults = makeAPICall(searchText);
+        searchResults.setText(apiResults);
 
 
         // Process the results (as an object)
@@ -54,7 +63,39 @@ public class PrimaryController {
     }
     protected String makeAPICall(String text) {
         String results = "";
+        String host = "http://gutendex.com/";
+        String endpoint = "books";
+        String query = "?" + text;
+
+        String url = host + endpoint + query;
+        try {
+            results = fetchContent(url);
+        }
+        catch (IOException ex) {
+            results = "Oops! There was a problem\n";
+            results += ex.toString();
+        }
 
         return results;
+    }
+    private static String fetchContent(String uri) throws IOException {
+        final int OK = 200;
+        URL url = new URL(uri);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == OK) {
+            BufferedReader in = new BufferedReader(
+                new InputStreamReader(connection.getInputStream())
+            );
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            return response.toString();
+        }
+        return null;
     }
 }
