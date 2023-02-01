@@ -6,6 +6,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -13,6 +18,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Window;
+import java.util.List;
 
 public class PrimaryController {
     @FXML
@@ -51,7 +57,13 @@ public class PrimaryController {
 
         // Make API Call
         String apiResults = makeAPICall(searchText);
-        searchResults.setText(apiResults);
+        JsonObject json = Model.parse(apiResults);
+        JsonArray jsonArray = new JsonArray();
+        if (json.get("results").isJsonArray()) {
+            jsonArray = json.get("results").getAsJsonArray();
+        }
+        
+        searchResults.setText(jsonArray.toString());
 
 
         // Process the results (as an object)
@@ -65,7 +77,7 @@ public class PrimaryController {
         String results = "";
         String host = "http://gutendex.com/";
         String endpoint = "books";
-        String query = "?" + text;
+        String query = "?search=" + text;
 
         String url = host + endpoint + query;
         try {
